@@ -1,6 +1,7 @@
 #include "lwtnn/LightweightNeuralNetwork.hh"
 
 #include <set>
+// #include <algorithm>
 
 // internal utility functions
 namespace {
@@ -230,6 +231,16 @@ namespace lwt {
       _names.push_back(input.name);
       in_num++;
     }
+    // build map from (sorted) input number to entry number
+    std::vector<std::pair<std::string, size_t> > sorted_inputs;
+    in_num = 0;
+    for (const auto& input: inputs) {
+      sorted_inputs.emplace_back(input.name, in_num);
+    }
+    std::sort(sorted_inputs.begin(), sorted_inputs.end());
+    for (const auto& pair: sorted_inputs) {
+      _sorted_index.push_back(pair.second);
+    }
   }
   VectorXd InputPreprocessor::operator()(const ValueMap& in) const {
     VectorXd invec(_names.size());
@@ -240,6 +251,19 @@ namespace lwt {
       }
       invec(input_number) = in.at(in_name);
       input_number++;
+    }
+    return (invec + _offsets).cwiseProduct(_scales);
+  }
+  VectorXd InputPreprocessor::operator()(const ValueVector& in) const {
+    if (in.size() != _sorted_index.size()) {
+      throw NNEvaluationException("size of input vector is incorrect");
+    }
+    if (!std::is_sorted(in.begin(), in.end())) {
+      throw NNEvaluationException("input not sorted");
+    }
+    VectorXd invec(_names.size());
+    for (size_t in_number = 0; in_number < in.size(); in_number++) {
+      invec(_sorted_index.at(in_number)) = in.at(in_number).second;
     }
     return (invec + _offsets).cwiseProduct(_scales);
   }

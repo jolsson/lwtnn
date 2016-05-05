@@ -132,11 +132,13 @@ namespace lwt {
   public:
     InputPreprocessor(const std::vector<Input>& inputs);
     VectorXd operator()(const ValueMap&) const;
+    VectorXd operator()(const ValueVector&) const;
   private:
     // input transformations
     VectorXd _offsets;
     VectorXd _scales;
     std::vector<std::string> _names;
+    std::vector<size_t> _sorted_index;
   };
 
   // ______________________________________________________________________
