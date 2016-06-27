@@ -24,8 +24,9 @@ addons:
       name: "dguest/lwtnn"
       description: "lightweight neural network for C++"
     notification_email: dhguest@gmail.com
-    build_command:   "make"
-    branch_pattern: coverity_scan
+    build_command_prepend: "make clean"
+    build_command: "make"
+    branch_pattern: coverity_scan_test
 
 # python dependencies
 python:
